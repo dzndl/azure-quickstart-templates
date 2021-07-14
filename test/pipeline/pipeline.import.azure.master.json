@@ -6,7 +6,8 @@
             ],
             "forks": {
                 "enabled": true,
-                "allowSecrets": true
+                "allowSecrets": true,
+                "allowFullAccessToken": false
             },
             "pathFilters": [
                 "-/test/*",
@@ -16,6 +17,22 @@
             "requireCommentsForNonTeamMembersOnly": false,
             "isCommentRequiredForPullRequest": false,
             "triggerType": 64
+        },
+        {
+            "schedules": [
+                {
+                    "branchFilters": [
+                        "+master"
+                    ],
+                    "timeZoneId": "UTC",
+                    "startHours": 23,
+                    "startMinutes": 25,
+                    "daysToBuild": 127,
+                    "scheduleJobId": "38e436b9-560f-4e2f-a451-ff52e5a3fdeb",
+                    "scheduleOnlyWithChanges": false
+                }
+            ],
+            "triggerType": 8
         }
     ],
     "variables": {
@@ -33,8 +50,26 @@
             "value": null,
             "isSecret": true
         },
+        "bicep.path": {
+            "value": "<this will be set by a pipeline task>"
+        },
+        "bicep.supported": {
+            "value": "<this will set by a pipeline task>"
+        },
+        "bicep.uri": {
+            "value": "https://github.com/Azure/bicep/releases/latest/download/bicep-win-x64.exe"
+        },
+        "bicep.version": {
+            "value": "<this will be set by a pipeline task>"
+        },
         "config.file.uri": {
-            "value": "https://azbotstorage.blob.core.windows.net/gen-artifacts-config/.config.json?st=2019-07-08T15%3A34%3A11Z&se=2029-07-09T15%3A34%3A00Z&sp=rl&sv=2018-03-28&sr=c&sig=2lONV85wm%2FFJ8zK89NoZ3QmkEjNBgqD3IIX9wUiseAI%3D"
+            "value": "https://azbotstorage.blob.core.windows.net/gen-artifacts-config/.config.json"
+        },
+        "environment": {
+            "value": "AzureCloud"
+        },
+        "gen.artifacts.resourceGroup": {
+            "value": "ttk-gen-artifacts"
         },
         "gen.parameters.filename": {
             "value": "gen.azuredeploy.parameters.json"
@@ -42,11 +77,29 @@
         "gen.prereq.parameters.filename": {
             "value": "gen.prereq.parameters.json"
         },
+        "github.enable.comments": {
+            "value": "true"
+        },
+        "github.enable.labels": {
+            "value": "true"
+        },
         "location": {
             "value": "westus"
         },
+        "mainTemplate.deployment.filename": {
+            "value": "<this will be set by a pipeline task> (the actual JSON file being deployed - currently this is always the same as mainTemplate.filename.json)"
+        },
         "mainTemplate.deployment.name": {
             "value": "mainTemplate-deployment"
+        },
+        "mainTemplate.filename": {
+            "value": "main.bicep"
+        },
+        "mainTemplate.filename.json": {
+            "value": "<this will be set by a pipeline task> (which JSON file is found, either azuredeploy.json or mainTemplate.json)"
+        },
+        "parameters.filename": {
+            "value": "azuredeploy.parameters.json"
         },
         "prereq.deployment.name": {
             "value": "prereq-deployment"
@@ -57,29 +110,51 @@
         "prereq.resourceGroup.name": {
             "value": "<this will set by a pipeline task>"
         },
+        "prereq.template.filename.bicep": {
+            "value": "prereq.main.bicep"
+        },
+        "prereq.template.filename.json": {
+            "value": "prereq.azuredeploy.json"
+        },
+        "prereq.template.fullpath": {
+            "value": "<this will be set by a pipeline task>"
+        },
         "resourceGroup.name": {
             "value": "<this will set by a pipeline task>"
         },
         "result.best.practice": {
-            "value": "False"
+            "value": "FAIL"
         },
         "result.credscan": {
             "value": ""
         },
         "result.deployment": {
-            "value": "False"
+            "value": "FAIL"
         },
         "result.deployment.last.test.date.parameter": {
-            "value": ""
+            "value": "PublicLastTestDate"
         },
         "result.deployment.parameter": {
             "value": "PublicDeployment"
+        },
+        "result.metadata": {
+            "value": "FAIL "
+        },
+        "result.readme": {
+            "value": "FAIL"
         },
         "sample.folder": {
             "value": "<this will set by a pipeline task>"
         },
         "skipComponentGovernanceDetection": {
             "value": "true"
+        },
+        "storage.account.key": {
+            "value": null,
+            "isSecret": true
+        },
+        "storage.account.name": {
+            "value": "azurequickstartsservice"
         },
         "subscription.id": {
             "value": "0cec7090-2e08-4498-9337-eb96ade50821"
@@ -98,11 +173,18 @@
             "value": "$(Agent.BuildDirectory)\\test"
         },
         "ttk.uri": {
-            "value": "https://aka.ms/arm-ttk"
+            "value": "https://aka.ms/arm-ttk-latest"
+        },
+        "validation.type": {
+            "value": "Automated"
+        },
+        "wait.role.assignment.seconds": {
+            "value": "0"
         }
     },
     "properties": {},
     "tags": [],
+    "comment": "ttk.uri: https://aka.ms/arm-ttk-latest",
     "jobAuthorizationScope": 1,
     "jobTimeoutInMinutes": 360,
     "jobCancelTimeoutInMinutes": 15,
@@ -113,32 +195,10 @@
                 "steps": [
                     {
                         "environment": {},
-                        "enabled": false,
-                        "continueOnError": false,
-                        "alwaysRun": false,
-                        "displayName": "Download Template Toolkit Release",
-                        "timeoutInMinutes": 0,
-                        "condition": "succeeded()",
-                        "task": {
-                            "id": "263abc27-4582-4174-8789-af599697778e",
-                            "versionSpec": "0.*",
-                            "definitionType": "task"
-                        },
-                        "inputs": {
-                            "connection": "d6ab5960-0304-494e-90fd-d42c7ed2cfbd",
-                            "userRepository": "Azure/azure-quickstart-templates",
-                            "defaultVersionType": "latest",
-                            "version": "",
-                            "itemPattern": "$(ttk.asset.filename)",
-                            "downloadPath": "$(ttk.folder)"
-                        }
-                    },
-                    {
-                        "environment": {},
                         "enabled": true,
                         "continueOnError": false,
                         "alwaysRun": false,
-                        "displayName": "Download TTK",
+                        "displayName": "Download TTK and CI scripts",
                         "timeoutInMinutes": 0,
                         "condition": "succeeded()",
                         "task": {
@@ -153,6 +213,33 @@
                             "script": "New-Item '$(ttk.folder)' -ItemType Directory\nInvoke-WebRequest -uri '$(ttk.uri)' -OutFile \"$(ttk.folder)/$(ttk.asset.filename)\" -Verbose\nGet-ChildItem '$(ttk.folder)' -Recurse\n\nWrite-Host \"Expanding files...\"\nExpand-Archive -Path '$(ttk.folder)/*.zip' -DestinationPath '$(ttk.folder)' -Verbose\n\nWrite-Host \"Expanded files found:\"\nGet-ChildItem '$(ttk.folder)' -Recurse",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": false,
+                        "continueOnError": false,
+                        "alwaysRun": false,
+                        "displayName": "Install Az Module from Storage",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeeded()",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "$AzModuleUri = 'https://azurequickstartsservice.blob.core.windows.net/ttk/AzModules/Az-AzTable.5.0.zip'\n\ngci env:\n $p = ($env:psmodulepath).split(';')[0]\n\nInvoke-WebRequest -uri \"$AzModuleUri\" -OutFile \"$env:TEMP/az.zip\" -Verbose\n\n#Get-ChildItem '$p' -Recurse\n\nWrite-Host \"Expanding files...\"\nExpand-Archive -Path \"$env:TEMP/az.zip\" -DestinationPath \"$p\" -Verbose\n\nWrite-Host \"Expanded files found:\"\n#Get-ChildItem \"$p\" -Recurse\n\nGet-Module Az -ListAvailable\n\n#Get-AzResourceGroup\n",
+                            "errorActionPreference": "stop",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -174,10 +261,11 @@
                         "inputs": {
                             "targetType": "filePath",
                             "filePath": "$(ttk.folder)/ci-scripts/ConnectTo-Azure.ps1",
-                            "arguments": "-appId $(app.id.admin) -secret $(app.secret.admin) -tenantId $(tenant.id) -subscriptionId $(subscription.id) -InstallAzModule",
+                            "arguments": "-appId $(app.id.admin) -secret \"$(app.secret.admin)\" -tenantId $(tenant.id) -subscriptionId $(subscription.id) -Environment $(environment) -InstallAzModule ",
                             "script": "",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -188,9 +276,61 @@
                         "enabled": true,
                         "continueOnError": false,
                         "alwaysRun": false,
-                        "displayName": "Get Folder for Sample",
+                        "displayName": "Get Oldest Sample Folder (If Scheduled)",
                         "timeoutInMinutes": 0,
-                        "condition": "succeeded()",
+                        "condition": "and(succeeded(), or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "filePath",
+                            "filePath": "$(ttk.folder)\\ci-scripts\\Get-OldestSampleFolder.ps1",
+                            "arguments": "-StorageAccountKey \"$(storage.account.key)\"",
+                            "script": "",
+                            "errorActionPreference": "stop",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "Set Build Number (If Scheduled)",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "$s = \"$(sample.name)\"\n$s = $s.Replace('\\', '#')\nWrite-Host \"Setting build #: $s\"\nWrite-Host \"##vso[build.updatebuildnumber]($s)\"\n",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": false,
+                        "displayName": "Get Sample Folder (If Pull Request)",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -202,32 +342,8 @@
                             "arguments": "",
                             "script": "",
                             "errorActionPreference": "stop",
-                            "failOnStderr": "false",
-                            "ignoreLASTEXITCODE": "false",
-                            "pwsh": "true",
-                            "workingDirectory": ""
-                        }
-                    },
-                    {
-                        "environment": {},
-                        "enabled": true,
-                        "continueOnError": false,
-                        "alwaysRun": false,
-                        "displayName": "DEBUG: Dump ENV",
-                        "timeoutInMinutes": 0,
-                        "condition": "succeeded()",
-                        "task": {
-                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
-                            "versionSpec": "2.*",
-                            "definitionType": "task"
-                        },
-                        "inputs": {
-                            "targetType": "inline",
-                            "filePath": "",
-                            "arguments": "",
-                            "script": "gci \"env:\"",
-                            "errorActionPreference": "continue",
-                            "failOnStderr": "false",
+                            "failOnStderr": "true",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -253,6 +369,239 @@
                             "script": "",
                             "errorActionPreference": "continue",
                             "failOnStderr": "true",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": true,
+                        "displayName": "DEBUG: Dump ENV",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeededOrFailed()",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "gci \"env:\"\n",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "GitHub PR label (add manual validation required)",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['github.enable.labels'], 'true'), eq(variables['validation.type'], 'Manual'), ne(variables['Build.SourceBranch'], 'refs/heads/master'))",
+                        "task": {
+                            "id": "79ae0514-ee91-4a19-ae69-030952b0b23e",
+                            "versionSpec": "0.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "gitHubConnection": "9d87270a-7fc7-43db-bf57-09f9f4e8879b",
+                            "action": "add",
+                            "label": "manual validation required"
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "PR label (add metadata violations)",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['github.enable.labels'], 'true'), eq(variables['result.metadata'], 'FAIL'), ne(variables['Build.SourceBranch'], 'refs/heads/master'))",
+                        "task": {
+                            "id": "79ae0514-ee91-4a19-ae69-030952b0b23e",
+                            "versionSpec": "0.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "gitHubConnection": "9d87270a-7fc7-43db-bf57-09f9f4e8879b",
+                            "action": "add",
+                            "label": "metadata violations"
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "PR label (remove metadata violations)",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['github.enable.labels'], 'true'), eq(variables['result.metadata'], 'PASS'), ne(variables['Build.SourceBranch'], 'refs/heads/master'))",
+                        "task": {
+                            "id": "79ae0514-ee91-4a19-ae69-030952b0b23e",
+                            "versionSpec": "0.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "gitHubConnection": "9d87270a-7fc7-43db-bf57-09f9f4e8879b",
+                            "action": "remove",
+                            "label": "metadata violations"
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": true,
+                        "displayName": "DEBUG: Dump ENV",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeededOrFailed()",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "gci \"env:\"\n",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": false,
+                        "displayName": "Check Language Support (Bicep/JSON)",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeeded()",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "filePath",
+                            "filePath": "$(ttk.folder)\\ci-scripts\\Check-LanguageSupport.ps1",
+                            "arguments": "",
+                            "script": "",
+                            "errorActionPreference": "stop",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "PR label (bicep)",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['github.enable.labels'], 'true'), eq(variables['bicep.supported'], 'true'), ne(variables['Build.SourceBranch'], 'refs/heads/master'))",
+                        "task": {
+                            "id": "79ae0514-ee91-4a19-ae69-030952b0b23e",
+                            "versionSpec": "0.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "gitHubConnection": "9d87270a-7fc7-43db-bf57-09f9f4e8879b",
+                            "action": "add",
+                            "label": "bicep"
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": false,
+                        "displayName": "BICEP: Install bicep",
+                        "timeoutInMinutes": 0,
+                        "condition": "eq(variables['bicep.supported'], 'true')",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "$(ttk.folder)\\ci-scripts\\Install-Bicep.ps1\n",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "true",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "Validate/build deployment template",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeeded()",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "# If Bicep, build and verify compiled JSON matches included JSON.\n$(ttk.folder)\\ci-scripts\\Validate-DeploymentFile.ps1",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "true",
+                            "showWarnings": "true",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": true,
+                        "displayName": "DEBUG: Dump ENV",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeededOrFailed()",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "gci \"env:\"\n",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -263,9 +612,147 @@
                         "enabled": true,
                         "continueOnError": true,
                         "alwaysRun": true,
-                        "displayName": "Validate README.md",
+                        "displayName": "DEBUG: Dump deployment file",
                         "timeoutInMinutes": 0,
                         "condition": "succeededOrFailed()",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "cat \"$($ENV:SAMPLE_FOLDER)/$(mainTemplate.deployment.filename)\"",
+                            "errorActionPreference": "stop",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "PR comment (doc owner)",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['github.enable.comments'], 'true'), eq(variables['Build.Reason'], 'PullRequest'), ne(variables['docOwner.message'], ''))",
+                        "task": {
+                            "id": "deea6198-adf8-4b16-9939-7addf85708b2",
+                            "versionSpec": "0.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "gitHubConnection": "9d87270a-7fc7-43db-bf57-09f9f4e8879b",
+                            "repositoryName": "$(Build.Repository.Name)",
+                            "id": "$(System.PullRequest.PullRequestNumber)",
+                            "comment": "$(docOwner.message)"
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": false,
+                        "displayName": "Check to see if this is a MOVE: PR",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['build.reason'], 'PullRequest'))",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "$GitHubRepository = $ENV:BUILD_REPOSITORY_NAME\n$GitHubPRNumber = $ENV:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER\n$HasDocOwner = $(($ENV:DOCOWNER_MESSAGE).Length -gt 0)\nWrite-Host \"##vso[task.setvariable variable=HasDocOwner]$HasDocOwner\"\n\n$PRUri = \"https://api.github.com/repos/$($GitHubRepository)/pulls/$($GitHubPRNumber)\"\n\n$response = Invoke-Restmethod \"$PRUri\"\n\nif($response.title -like \"*MOVE:*\" -and $HasDocOwner){\n    Write-Host \"##vso[task.setvariable variable=pingTom]YES\"\n}\n",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "Ping mumian",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['github.enable.comments'], 'true'), eq(variables['pingTom'], 'YES'))",
+                        "task": {
+                            "id": "deea6198-adf8-4b16-9939-7addf85708b2",
+                            "versionSpec": "0.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "gitHubConnection": "9d87270a-7fc7-43db-bf57-09f9f4e8879b",
+                            "repositoryName": "$(Build.Repository.Name)",
+                            "id": "$(System.PullRequest.PullRequestNumber)",
+                            "comment": "@mumian - this appears to be a \"Move\" that will need a manual doc update"
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "Ping TomFitz re: moving a sample used in docs copy",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['github.enable.comments'], 'true'), eq(variables['pingTom'], 'YES'))",
+                        "task": {
+                            "id": "deea6198-adf8-4b16-9939-7addf85708b2",
+                            "versionSpec": "0.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "gitHubConnection": "9d87270a-7fc7-43db-bf57-09f9f4e8879b",
+                            "repositoryName": "$(Build.Repository.Name)",
+                            "id": "$(System.PullRequest.PullRequestNumber)",
+                            "comment": "@tfitzmac - this appears to be a \"Move\" that will need a manual doc update"
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": true,
+                        "displayName": "DEBUG: Dump ENV",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeededOrFailed()",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "gci \"env:\"\n",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "Validate README.md",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeeded()",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -278,6 +765,71 @@
                             "script": "",
                             "errorActionPreference": "continue",
                             "failOnStderr": "true",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "PR label (add readme violations)",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['github.enable.labels'], 'true'), eq(variables['result.readme'], 'FAIL'), ne(variables['Build.SourceBranch'], 'refs/heads/master'))",
+                        "task": {
+                            "id": "79ae0514-ee91-4a19-ae69-030952b0b23e",
+                            "versionSpec": "0.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "gitHubConnection": "9d87270a-7fc7-43db-bf57-09f9f4e8879b",
+                            "action": "add",
+                            "label": "readme violations"
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "PR label (remove readme violations)",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['github.enable.labels'], 'true'), eq(variables['result.readme'], 'PASS'), ne(variables['Build.SourceBranch'], 'refs/heads/master'))",
+                        "task": {
+                            "id": "79ae0514-ee91-4a19-ae69-030952b0b23e",
+                            "versionSpec": "0.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "gitHubConnection": "9d87270a-7fc7-43db-bf57-09f9f4e8879b",
+                            "action": "remove",
+                            "label": "readme violations"
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": true,
+                        "displayName": "DEBUG: DIR sample folder",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeededOrFailed()",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "dir $(sample.folder)",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -300,9 +852,100 @@
                             "targetType": "inline",
                             "filePath": "",
                             "arguments": "",
-                            "script": "Import-Module $(ttk.folder)/arm-ttk/arm-ttk.psd1 -Verbose\n$testOutput = @(Test-AzTemplate -TemplatePath \"$(sample.folder)\")\n$testOutput\n\nif ($testOutput | ? {$_.Errors }) {\n   exit 1 \n} else {\n    Write-Host \"##vso[task.setvariable variable=result.best.practice]$true\"\n    exit 0\n} \n",
+                            "script": "$(ttk.folder)\\ci-scripts\\Test-BestPractices.ps1",
                             "errorActionPreference": "continue",
                             "failOnStderr": "true",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": true,
+                        "displayName": "DEBUG: Dump ENV",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeededOrFailed()",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "gci \"env:\"\n",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "PR label (add best practices violations)",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['github.enable.labels'], 'true'), eq(variables['result.best.practice'], 'FAIL'), ne(variables['Build.SourceBranch'], 'refs/heads/master'))",
+                        "task": {
+                            "id": "79ae0514-ee91-4a19-ae69-030952b0b23e",
+                            "versionSpec": "0.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "gitHubConnection": "9d87270a-7fc7-43db-bf57-09f9f4e8879b",
+                            "action": "add",
+                            "label": "best practices violations"
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": false,
+                        "displayName": "PR label (remove best practices violations)",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['github.enable.labels'], 'true'), eq(variables['result.best.practice'], 'true'), ne(variables['Build.SourceBranch'], 'refs/heads/master'))",
+                        "task": {
+                            "id": "79ae0514-ee91-4a19-ae69-030952b0b23e",
+                            "versionSpec": "0.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "gitHubConnection": "9d87270a-7fc7-43db-bf57-09f9f4e8879b",
+                            "action": "remove",
+                            "label": "best practices violations"
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": false,
+                        "displayName": "Check for Prereqs",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "filePath",
+                            "filePath": "$(ttk.folder)\\ci-scripts\\Check-Prereqs.ps1",
+                            "arguments": "",
+                            "script": "",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -313,9 +956,9 @@
                         "enabled": true,
                         "continueOnError": false,
                         "alwaysRun": false,
-                        "displayName": "Generate RG Names and Check for Prereqs",
+                        "displayName": "Generate RG Names",
                         "timeoutInMinutes": 0,
-                        "condition": "succeeded()",
+                        "condition": "and(succeeded(), ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -324,9 +967,11 @@
                         "inputs": {
                             "targetType": "filePath",
                             "filePath": "$(ttk.folder)\\ci-scripts\\Gen-ResourceGroupNames.ps1",
-                            "arguments": "-sampleFolder $(sample.folder)",
+                            "arguments": "-sampleFolder \"$(sample.folder)\"",
+                            "script": "\n",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -339,7 +984,7 @@
                         "alwaysRun": false,
                         "displayName": "Create ResourceGroup - Assign RBAC (mainTemplate RG)",
                         "timeoutInMinutes": 0,
-                        "condition": "succeeded()",
+                        "condition": "and(succeeded(), ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -348,10 +993,11 @@
                         "inputs": {
                             "targetType": "filePath",
                             "filePath": "$(ttk.folder)/ci-scripts/Create-ResourceGroupAssignment.ps1",
-                            "arguments": "-ResourceGroupName \"$(resourceGroup.name)\" -Location $(location) -appId $(app.id)",
+                            "arguments": "-ResourceGroupName \"$(resourceGroup.name)\" -Location \"$(location)\" -appId $(app.id) ",
                             "script": "",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -364,7 +1010,7 @@
                         "alwaysRun": false,
                         "displayName": "Create ResourceGroup - Assign RBAC (prereqs RG) ",
                         "timeoutInMinutes": 0,
-                        "condition": "and(succeeded(), eq(variables['deploy.prereqs'], 'true'), ne(variables['prereq.resourceGroup.name'], variables['resourceGroup.name']))",
+                        "condition": "and(succeeded(), eq(variables['deploy.prereqs'], 'true'), ne(variables['prereq.resourceGroup.name'], variables['resourceGroup.name']),  ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -373,10 +1019,11 @@
                         "inputs": {
                             "targetType": "filePath",
                             "filePath": "$(ttk.folder)/ci-scripts/Create-ResourceGroupAssignment.ps1",
-                            "arguments": "-ResourceGroupName \"$(prereq.resourceGroup.name)\" -Location $(location) -appId $(app.id)",
+                            "arguments": "-ResourceGroupName \"$(prereq.resourceGroup.name)\" -Location \"$(location)\" -appId $(app.id)",
                             "script": "",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -387,7 +1034,7 @@
                         "enabled": true,
                         "continueOnError": false,
                         "alwaysRun": false,
-                        "displayName": "Connect To Azure (non-Admin) To Deploy",
+                        "displayName": "Sleep (wait for roleAssignment to replicate)",
                         "timeoutInMinutes": 0,
                         "condition": "succeeded()",
                         "task": {
@@ -396,12 +1043,39 @@
                             "definitionType": "task"
                         },
                         "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "Start-Sleep $(wait.role.assignment.seconds)",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "false",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": false,
+                        "displayName": "Connect To Azure (non-Admin) To Deploy",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
                             "targetType": "filePath",
                             "filePath": "$(ttk.folder)/ci-scripts/ConnectTo-Azure.ps1",
-                            "arguments": "-appId $(app.id) -secret $(app.secret) -tenantId $(tenant.id) -subscriptionId $(subscription.id)",
+                            "arguments": "-appId $(app.id) -secret \"$(app.secret)\" -tenantId $(tenant.id) -subscriptionId $(subscription.id) -Environment \"$(environment)\"",
                             "script": "",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -414,7 +1088,7 @@
                         "alwaysRun": false,
                         "displayName": "GEN Parameters (Prereqs)",
                         "timeoutInMinutes": 0,
-                        "condition": "and(succeeded(), eq(variables['deploy.prereqs'], 'true'))",
+                        "condition": "and(succeeded(), eq(variables['deploy.prereqs'], 'true'), ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -423,10 +1097,11 @@
                         "inputs": {
                             "targetType": "filePath",
                             "filePath": "$(ttk.folder)/ci-scripts/Gen-TemplateParameters.ps1",
-                            "arguments": "-configUri \"$(config.file.uri)\" -TemplateParametersFile \"$(sample.folder)\\prereqs\\prereq.azuredeploy.parameters.json\" -NewTemplateParametersFile \"$(sample.folder)\\prereqs\\$(gen.prereq.parameters.filename)\"",
+                            "arguments": "-configUri \"$(config.file.uri)\" -TemplateParametersFile \"$(sample.folder)\\prereqs\\prereq.$(parameters.filename)\" -NewTemplateParametersFile \"$(sample.folder)\\prereqs\\$(gen.prereq.parameters.filename)\"",
                             "script": "",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -437,9 +1112,35 @@
                         "enabled": true,
                         "continueOnError": false,
                         "alwaysRun": false,
-                        "displayName": "Deploy Template (prereqs)",
+                        "displayName": "DEBUG: dump mainTemplate param file content (prereqs)",
                         "timeoutInMinutes": 0,
-                        "condition": "and(succeeded(), eq(variables['deploy.prereqs'], 'true'))",
+                        "condition": "and(succeeded(), ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "if(Test-Path -Path \"$(sample.folder)\\prereqs\\$(gen.prereq.parameters.filename)\"){\n\n  Write-Output (Get-Content \"$(sample.folder)\\prereqs\\$(gen.prereq.parameters.filename)\" -Raw)\n\n}\n",
+                            "errorActionPreference": "stop",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": false,
+                        "displayName": "Deploy Prerequisites",
+                        "timeoutInMinutes": 0,
+                        "condition": "and(succeeded(), eq(variables['deploy.prereqs'], 'true'), ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -448,10 +1149,11 @@
                         "inputs": {
                             "targetType": "filePath",
                             "filePath": "$(ttk.folder)\\Deploy-AzTemplate.ps1",
-                            "arguments": "-ArtifactStagingDirectory \"$(sample.folder)\\prereqs\" -Location \"$(Location)\" -ResourceGroupName \"$(prereq.resourceGroup.name)\" -TemplateParametersFile \"$(sample.folder)\\prereqs\\$(gen.prereq.parameters.filename)\" -DeploymentName \"$(prereq.deployment.name)\" -TemplateFile \"$(sample.folder)\\prereqs\\prereq.azuredeploy.json\"",
+                            "arguments": "-ArtifactStagingDirectory \"$(sample.folder)\\prereqs\" -Location \"$(Location)\" -ResourceGroupName \"$(prereq.resourceGroup.name)\" -TemplateParametersFile \"$(sample.folder)\\prereqs\\$(gen.prereq.parameters.filename)\" -DeploymentName \"$(prereq.deployment.name)\" -TemplateFile \"$(prereq.template.fullpath)\"",
                             "script": "",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -464,7 +1166,7 @@
                         "alwaysRun": false,
                         "displayName": "Dump Outputs To File (prereqs)",
                         "timeoutInMinutes": 0,
-                        "condition": "and(succeeded(), eq(variables['deploy.prereqs'], 'true'))",
+                        "condition": "and(succeeded(), eq(variables['deploy.prereqs'], 'true'), ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -474,9 +1176,10 @@
                             "targetType": "inline",
                             "filePath": "",
                             "arguments": "",
-                            "script": "$PreReqOutputs = (Get-AzResourceGroupDeployment -ResourceGroupName \"$(prereq.resourceGroup.name)\" -Name $(prereq.deployment.name)).Outputs | ConvertTo-Json\nWrite-Host \"$PreReqOutputs\"\n\n###Write-Output \"##vso[task.setvariable variable=prereq.config.json]$PreReqOutputs\"\n\n$PreReqOutputs | Out-File -FilePath \"$(sample.folder)\\prereqs\\$(prereq.outputs.filename)\"",
+                            "script": "$PreReqOutputs = (Get-AzResourceGroupDeployment -ResourceGroupName \"$(prereq.resourceGroup.name)\" -Name $(prereq.deployment.name)).Outputs | ConvertTo-Json -Depth 100\nWrite-Output \"$PreReqOutputs\"\n\n###Write-Output \"##vso[task.setvariable variable=prereq.config.json]$PreReqOutputs\"\n\n$PreReqOutputs | Out-File -FilePath \"$(sample.folder)\\prereqs\\$(prereq.outputs.filename)\"",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -489,7 +1192,7 @@
                         "alwaysRun": false,
                         "displayName": "DEBUG: Dump Prereqs Output File",
                         "timeoutInMinutes": 0,
-                        "condition": "and(succeeded(), eq(variables['deploy.prereqs'], 'true'))",
+                        "condition": "and(succeeded(), eq(variables['deploy.prereqs'], 'true'),  ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -499,9 +1202,10 @@
                             "targetType": "inline",
                             "filePath": "",
                             "arguments": "",
-                            "script": "Write-Host (Get-Content \"$(sample.folder)\\prereqs\\$(prereq.outputs.filename)\" -Raw)\n",
+                            "script": "Write-Output (Get-Content \"$(sample.folder)\\prereqs\\$(prereq.outputs.filename)\" -Raw)\n",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -514,7 +1218,7 @@
                         "alwaysRun": false,
                         "displayName": "GEN mainTemplate Params",
                         "timeoutInMinutes": 0,
-                        "condition": "succeeded()",
+                        "condition": "and(succeeded(), ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -523,10 +1227,11 @@
                         "inputs": {
                             "targetType": "filePath",
                             "filePath": "$(ttk.folder)/ci-scripts/Gen-TemplateParameters.ps1",
-                            "arguments": "-configUri \"$(config.file.uri)\" -TemplateParametersFile \"$(sample.folder)\\azuredeploy.parameters.json\" -NewTemplateParametersFile \"$(sample.folder)\\$(gen.parameters.filename)\" -prereqOutputsFileName \"$(sample.folder)\\prereqs\\$(prereq.outputs.filename)\"",
+                            "arguments": "-configUri \"$(config.file.uri)\" -TemplateParametersFile \"$(sample.folder)\\$(parameters.filename)\" -NewTemplateParametersFile \"$(sample.folder)\\$(gen.parameters.filename)\" -prereqOutputsFileName \"$(sample.folder)\\prereqs\\$(prereq.outputs.filename)\"",
                             "script": "",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -539,7 +1244,7 @@
                         "alwaysRun": false,
                         "displayName": "DEBUG: dump mainTemplate param file content",
                         "timeoutInMinutes": 0,
-                        "condition": "succeeded()",
+                        "condition": "and(succeeded(), ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -549,9 +1254,10 @@
                             "targetType": "inline",
                             "filePath": "",
                             "arguments": "",
-                            "script": "Write-Host (Get-Content \"$(sample.folder)\\$(gen.parameters.filename)\" -Raw)",
+                            "script": "Write-Output (Get-Content \"$(sample.folder)\\$(gen.parameters.filename)\" -Raw)",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -564,7 +1270,7 @@
                         "alwaysRun": false,
                         "displayName": "Deploy mainTemplate",
                         "timeoutInMinutes": 0,
-                        "condition": "succeeded()",
+                        "condition": "and(succeeded(), ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -574,9 +1280,10 @@
                             "targetType": "inline",
                             "filePath": "",
                             "arguments": "",
-                            "script": "$(ttk.folder)\\Deploy-AzTemplate.ps1 `\n    -ArtifactStagingDirectory \"$(sample.folder)\" `\n    -Location \"$(Location)\" `\n    -ResourceGroupName \"$(resourceGroup.name)\" `\n    -TemplateParametersFile \"$(sample.folder)\\$(gen.parameters.filename)\" `\n    -DeploymentName \"$(mainTemplate.deployment.name)\"\n\nWrite-Host \"##vso[task.setvariable variable=result.deployment]$true\"\n\n",
+                            "script": "$(ttk.folder)\\Deploy-AzTemplate.ps1 `\n    -ArtifactStagingDirectory \"$(sample.folder)\" `\n    -TemplateFile \"$(sample.folder)\\$(mainTemplate.deployment.filename)\" `\n    -Location \"$(Location)\" `\n    -ResourceGroupName \"$(resourceGroup.name)\" `\n    -TemplateParametersFile \"$(sample.folder)\\$(gen.parameters.filename)\" `\n    -DeploymentName \"$(mainTemplate.deployment.name)\"\n\nWrite-Host \"##vso[task.setvariable variable=result.deployment]$true\"\n",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -589,7 +1296,7 @@
                         "alwaysRun": false,
                         "displayName": "Connect To Azure (Admin) To Clean Up",
                         "timeoutInMinutes": 0,
-                        "condition": "always()",
+                        "condition": "and(ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -598,10 +1305,37 @@
                         "inputs": {
                             "targetType": "filePath",
                             "filePath": "$(ttk.folder)/ci-scripts/ConnectTo-Azure.ps1",
-                            "arguments": "-appId $(app.id.admin) -secret $(app.secret.admin) -tenantId $(tenant.id) -subscriptionId $(subscription.id)",
+                            "arguments": "-appId $(app.id.admin) -secret \"$(app.secret.admin)\" -tenantId $(tenant.id) -subscriptionId $(subscription.id) -Environment $(environment)",
                             "script": "",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
+                            "ignoreLASTEXITCODE": "false",
+                            "pwsh": "true",
+                            "workingDirectory": ""
+                        }
+                    },
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": false,
+                        "alwaysRun": true,
+                        "displayName": "DEBUG: Dump ENV",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeededOrFailed()",
+                        "task": {
+                            "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                            "versionSpec": "2.*",
+                            "definitionType": "task"
+                        },
+                        "inputs": {
+                            "targetType": "inline",
+                            "filePath": "",
+                            "arguments": "",
+                            "script": "gci \"env:\"\n",
+                            "errorActionPreference": "continue",
+                            "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -611,10 +1345,10 @@
                         "environment": {},
                         "enabled": true,
                         "continueOnError": true,
-                        "alwaysRun": true,
+                        "alwaysRun": false,
                         "displayName": "Write Test Result for README.MD",
                         "timeoutInMinutes": 0,
-                        "condition": "succeededOrFailed()",
+                        "condition": "always()",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -623,10 +1357,11 @@
                         "inputs": {
                             "targetType": "filePath",
                             "filePath": "$(ttk.folder)\\ci-scripts\\Write-TestResults.ps1",
-                            "arguments": "-$(result.deployment.parameter) $(result.deployment)",
-                            "script": "",
+                            "arguments": "-$(result.deployment.parameter) \"$(result.deployment)\" -StorageAccountKey \"$(storage.account.key)\"",
+                            "script": "<#\n\nThis is a placeholder - for when we want to write the last test result to the readme file\n\n#>",
                             "errorActionPreference": "stop",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -639,7 +1374,7 @@
                         "alwaysRun": false,
                         "displayName": "Clean Up ResourceGroup (main)",
                         "timeoutInMinutes": 0,
-                        "condition": "always()",
+                        "condition": "and(ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -650,8 +1385,9 @@
                             "filePath": "",
                             "arguments": "",
                             "script": "# remove the resource group\nWrite-Host \"First attempt...\"\n& $(ttk.folder)/ci-scripts/Kill-AzResourceGroup.ps1 -ResourceGroupName \"$(resourceGroup.name)\" -ErrorAction SilentlyContinue\n\n# if the resource group still exists after the first attempt, try again after a few minutes\nWrite-Host \"Checking for ResourceGroup…\"\nif ((Get-AzResourceGroup -Name \"$(resourceGroup.name)\" -verbose -ErrorAction SilentlyContinue) -ne $null) {\n\n    Write-Host \"Found the resource group - sleeping...\" \n    Sleep 600\n    Write-Host \"Attempting Kill-AzResourceGroup…\"\n    & $(ttk.folder)/ci-scripts/Kill-AzResourceGroup.ps1 -ResourceGroupName \"$(resourceGroup.name)\"\n\n}\n",
-                            "errorActionPreference": "stop",
+                            "errorActionPreference": "continue",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -664,7 +1400,7 @@
                         "alwaysRun": false,
                         "displayName": "Clean Up ResourceGroup (prereqs)",
                         "timeoutInMinutes": 0,
-                        "condition": "and(always(), eq(variables['deploy.prereqs'], 'true'), ne(variables['prereq.resourceGroup.name'], variables['resourceGroup.name']))",
+                        "condition": "and(eq(variables['deploy.prereqs'], 'true'), ne(variables['prereq.resourceGroup.name'], variables['resourceGroup.name']),  ne(variables['result.deployment'], 'Not Supported'), ne(variables['validation.type'], 'Manual'))",
                         "task": {
                             "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                             "versionSpec": "2.*",
@@ -675,8 +1411,9 @@
                             "filePath": "",
                             "arguments": "",
                             "script": "# remove the resource group\nWrite-Host \"First attempt...\"\n& $(ttk.folder)/ci-scripts/Kill-AzResourceGroup.ps1 -ResourceGroupName \"$(prereq.resourceGroup.name)\" -ErrorAction SilentlyContinue\n\n# if the resource group still exists after the first attempt, try again after a few minutes\nWrite-Host \"Checking for ResourceGroup…\"\nif ((Get-AzResourceGroup -Name \"$(prereq.resourceGroup.name)\" -verbose -ErrorAction SilentlyContinue) -ne $null) {\n\n    Write-Host \"Found the resource group - sleeping...\" \n    Sleep 600\n    Write-Host \"Attempting Kill-AzResourceGroup…\"\n    & $(ttk.folder)/ci-scripts/Kill-AzResourceGroup.ps1 -ResourceGroupName \"$(prereq.resourceGroup.name)\"\n}\n",
-                            "errorActionPreference": "stop",
+                            "errorActionPreference": "continue",
                             "failOnStderr": "false",
+                            "showWarnings": "false",
                             "ignoreLASTEXITCODE": "false",
                             "pwsh": "true",
                             "workingDirectory": ""
@@ -704,13 +1441,13 @@
             "apiUrl": "https://api.github.com/repos/Azure/azure-quickstart-templates",
             "branchesUrl": "https://api.github.com/repos/Azure/azure-quickstart-templates/branches",
             "cloneUrl": "https://github.com/Azure/azure-quickstart-templates.git",
-            "connectedServiceId": "d6ab5960-0304-494e-90fd-d42c7ed2cfbd",
+            "connectedServiceId": "50e33d0b-fa1f-4db0-9552-57d2ccb899a3",
             "defaultBranch": "master",
             "fullName": "Azure/azure-quickstart-templates",
-            "hasAdminPermissions": "True",
+            "hasAdminPermissions": "False",
             "isFork": "False",
             "isPrivate": "False",
-            "lastUpdated": "09/17/2019 18:39:56",
+            "lastUpdated": "05/11/2021 06:23:36",
             "manageUrl": "https://github.com/Azure/azure-quickstart-templates",
             "nodeId": "MDEwOlJlcG9zaXRvcnkzNDQwNzY1MQ==",
             "ownerId": "6844498",
@@ -718,7 +1455,7 @@
             "refsUrl": "https://api.github.com/repos/Azure/azure-quickstart-templates/git/refs",
             "safeRepository": "Azure/azure-quickstart-templates",
             "shortName": "azure-quickstart-templates",
-            "ownerAvatarUrl": "https://avatars0.githubusercontent.com/u/6844498?v=4",
+            "ownerAvatarUrl": "https://avatars.githubusercontent.com/u/6844498?v=4",
             "archived": "False",
             "externalId": "34407651",
             "ownerIsAUser": "False",
@@ -742,40 +1479,28 @@
     "processParameters": {},
     "quality": 1,
     "authoredBy": {
-        "displayName": "Brian Moore (AZURE RESOURCE MANAGER)",
-        "url": "https://spsprodcus1.vssps.visualstudio.com/Ac8aef736-af44-4df8-8ee0-e3f71ba093b7/_apis/Identities/a776ea98-0041-458d-a782-55b352492e1e",
+        "displayName": "Stephen Weatherford",
+        "url": "https://spsprodcus1.vssps.visualstudio.com/Ac8aef736-af44-4df8-8ee0-e3f71ba093b7/_apis/Identities/5ccdb3f3-0839-677f-ba16-981fe10b5b67",
         "_links": {
             "avatar": {
-                "href": "https://dev.azure.com/azurequickstarts/_apis/GraphProfile/MemberAvatars/aad.ZmNkYzI4MmEtZTY1My03M2Y5LThkNTgtYzgwMTY1ZDM1NTRk"
+                "href": "https://dev.azure.com/azurequickstarts/_apis/GraphProfile/MemberAvatars/aad.NWNjZGIzZjMtMDgzOS03NzdmLWJhMTYtOTgxZmUxMGI1YjY3"
             }
         },
-        "id": "a776ea98-0041-458d-a782-55b352492e1e",
-        "uniqueName": "bmoore@microsoft.com",
-        "imageUrl": "https://dev.azure.com/azurequickstarts/_apis/GraphProfile/MemberAvatars/aad.ZmNkYzI4MmEtZTY1My03M2Y5LThkNTgtYzgwMTY1ZDM1NTRk",
-        "descriptor": "aad.ZmNkYzI4MmEtZTY1My03M2Y5LThkNTgtYzgwMTY1ZDM1NTRk"
+        "id": "5ccdb3f3-0839-677f-ba16-981fe10b5b67",
+        "uniqueName": "stephwe@microsoft.com",
+        "imageUrl": "https://dev.azure.com/azurequickstarts/_apis/GraphProfile/MemberAvatars/aad.NWNjZGIzZjMtMDgzOS03NzdmLWJhMTYtOTgxZmUxMGI1YjY3",
+        "descriptor": "aad.NWNjZGIzZjMtMDgzOS03NzdmLWJhMTYtOTgxZmUxMGI1YjY3"
     },
     "drafts": [],
-    "queue": {
-        "_links": {
-            "self": {
-                "href": "https://dev.azure.com/azurequickstarts/_apis/build/Queues/15"
-            }
-        },
-        "id": 15,
-        "name": "Hosted Windows Container",
-        "url": "https://dev.azure.com/azurequickstarts/_apis/build/Queues/15",
-        "pool": {
-            "id": 7,
-            "name": "Hosted Windows Container",
-            "isHosted": true
-        }
-    },
-    "id": 5,
+    "id": 20,
+    "name": "AzQuickStarts-New-Public",
+    "url": "https://dev.azure.com/azurequickstarts/b191bd7a-37bb-47b0-870c-3f1270a79b3d/_apis/build/Definitions/20?revision=164",
+    "uri": "vstfs:///Build/Definition/20",
     "path": "\\",
     "type": 2,
-    "queueStatus": 0,
-    "revision": 36,
-    "createdDate": "2019-09-17T18:50:03.973Z",
+    "queueStatus": 1,
+    "revision": 164,
+    "createdDate": "2021-05-11T06:25:37.860Z",
     "project": {
         "id": "b191bd7a-37bb-47b0-870c-3f1270a79b3d",
         "name": "azure-quickstart-templates",
