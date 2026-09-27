@@ -7,6 +7,8 @@ export DOMAINNAME=$5
 export SINGLEORMULTI=$6
 export REGION=$7
 export RESOURCEGROUPNAME=$8
+export VNETNAME=$9
+export WORKERSUBNETNAME=${10}
 
 export MULTIZONE1=1
 export MULTIZONE2=2
@@ -99,7 +101,7 @@ metadata:
   labels:
     operators.coreos.com/ocs-operator.openshift-storage: ''
 spec:
-  channel: stable-4.6
+  channel: stable-4.8
   installPlanApproval: Automatic
   name: ocs-operator
   source: redhat-operators
@@ -146,7 +148,7 @@ spec:
       portable: true
       replica: 3
       resources: {}
-  version: 4.6.0
+  version: 4.8.0
 EOF"
 
 runuser -l $SUDOUSER -c "cat > $OCSTEMPLATES/ocs-machineset-singlezone.yaml <<EOF
@@ -207,11 +209,11 @@ spec:
           publicIP: false
           publicLoadBalancer: CLUSTERID
           resourceGroup: CLUSTERID-rg
-          subnet: workerSubnet
+          subnet: $WORKERSUBNETNAME
           userDataSecret:
             name: worker-user-data
           vmSize: Standard_D16s_v3
-          vnet: myVNet
+          vnet: $VNETNAME
           zone: \"\"
 EOF"
 
@@ -274,11 +276,11 @@ spec:
           publicIP: false
           publicLoadBalancer: CLUSTERID
           resourceGroup: CLUSTERID-rg
-          subnet: workerSubnet
+          subnet: $WORKERSUBNETNAME
           userDataSecret:
             name: worker-user-data
           vmSize: Standard_D16s_v3
-          vnet: myVNet
+          vnet: $VNETNAME
           zone: \"1\"
 ---
 apiVersion: machine.openshift.io/v1beta1
@@ -338,11 +340,11 @@ spec:
           publicIP: false
           publicLoadBalancer: CLUSTERID
           resourceGroup: CLUSTERID-rg
-          subnet: workerSubnet
+          subnet: $WORKERSUBNETNAME
           userDataSecret:
             name: worker-user-data
           vmSize: Standard_D16s_v3
-          vnet: myVNet
+          vnet: $VNETNAME
           zone: \"2\"
 ---
 apiVersion: machine.openshift.io/v1beta1
@@ -402,11 +404,11 @@ spec:
           publicIP: false
           publicLoadBalancer: CLUSTERID
           resourceGroup: CLUSTERID-rg
-          subnet: workerSubnet
+          subnet: $WORKERSUBNETNAME
           userDataSecret:
             name: worker-user-data
           vmSize: Standard_D16s_v3
-          vnet: myVNet
+          vnet: $VNETNAME
           zone: \"3\"
 EOF"
 

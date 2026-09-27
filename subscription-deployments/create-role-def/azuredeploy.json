@@ -1,6 +1,13 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.25.53.49325",
+      "templateHash": "16704138909949665309"
+    }
+  },
   "parameters": {
     "actions": {
       "type": "array",
@@ -34,18 +41,17 @@
     }
   },
   "variables": {
-    "roleDefName": "[guid(subscription().id, string(parameters('actions')), string(parameters('notActions')))]"
+    "roleDefName": "[guid(parameters('roleName'))]"
   },
   "resources": [
     {
       "type": "Microsoft.Authorization/roleDefinitions",
-      "apiVersion": "2018-07-01",
+      "apiVersion": "2022-04-01",
       "name": "[variables('roleDefName')]",
       "properties": {
         "roleName": "[parameters('roleName')]",
         "description": "[parameters('roleDescription')]",
         "type": "customRole",
-        "isCustom": true,
         "permissions": [
           {
             "actions": "[parameters('actions')]",

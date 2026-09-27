@@ -1,4 +1,14 @@
-# Geth Private Node
+---
+description: This template deploys a Go Ethereum client along with a genesis block on Ubuntu virtual machines
+page_type: sample
+products:
+- azure
+- azure-resource-manager
+urlFragment: go-ethereum-on-ubuntu
+languages:
+- json
+---
+# Go Ethereum on Ubuntu
 
 ![Azure Public Test Date](https://azurequickstartsservice.blob.core.windows.net/badges/application-workloads/ethereum/go-ethereum-on-ubuntu/PublicLastTestDate.svg)
 ![Azure Public Test Result](https://azurequickstartsservice.blob.core.windows.net/badges/application-workloads/ethereum/go-ethereum-on-ubuntu/PublicDeployment.svg)
@@ -63,7 +73,7 @@ Welcome to the Ethereum ecosystem. You are now on your journey to becoming a dec
 
 Earlier when you ran the `ls` command there was a file named `GuestBook.sol` - this is a very simple guest book contract written in the Solidity smart contract programming language.
 
-[Learning Solidity](https://solidity.readthedocs.org) is beyond the scope of this walk through, but feel free to read the code and try to understand what the contract is trying to do.  
+[Learning Solidity](https://solidity.readthedocs.org) is beyond the scope of this walk through, but feel free to read the code and try to understand what the contract is trying to do.
 
 Getting familiar with Solidity contracts and deploying them to the network can be a bit of a learning curve - there are a number of different steps in the journey from source code to having a contract live on the public network; we'll try to address each of these steps.
 
@@ -101,7 +111,7 @@ The next step is to use the web3 ethereum helpers to instantiate a contract obje
 var contract = web3.eth.contract(guestBookCompiled['<stdin>:GuestBook'].info.abiDefinition);
 ```
 
-This will give us an instantiated contract object containing the all important `new` function. `new` is what we'll use to actually deploy the contract to your Ethereum private network. Since we're in Javascript land, `new` takes a call back as its final parameter to notify us of successful or failed deployment; lets set up this call back first:
+This will give us an instantiated contract object containing the all important `new` function. `new` is what we'll use to actually deploy the contract to your Ethereum private network. Since we're in JavaScript land, `new` takes a call back as its final parameter to notify us of successful or failed deployment; lets set up this call back first:
 
 ```
 var callback = function(e, contract){
@@ -232,5 +242,4 @@ Now if we read from the contract:
 ```
 
 Congratulations! Your first contract is alive and well on your private Ethereum blockchain.
-
-
+`Tags: Microsoft.Network/publicIPAddresses, Microsoft.Network/virtualNetworks, Microsoft.Network/networkInterfaces, Microsoft.Compute/virtualMachines, Microsoft.Compute/virtualMachines/extensions, CustomScript`

@@ -1,6 +1,9 @@
 @description('Name for the container group')
 param name string = 'acilinuxpublicipcontainergroup'
 
+@description('Location for all resources.')
+param location string = resourceGroup().location
+
 @description('Container image to deploy. Should be of the form repoName/imagename:tag for images stored in public Docker Hub, or a fully qualified URI for other registries. Images from private registries require additional registry credentials.')
 param image string = 'mcr.microsoft.com/azuredocs/aci-helloworld'
 
@@ -21,10 +24,10 @@ param memoryInGb int = 2
 ])
 param restartPolicy string = 'Always'
 
-@description('Location for all resources.')
-param location string = resourceGroup().location
+@description('The availability zone to deploy the container group into. If not specified, the container group is nonzonal and might be deployed into any zone.')
+param zone string?
 
-resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01' = {
+resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2023-05-01' = {
   name: name
   location: location
   properties: {
@@ -60,6 +63,11 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01'
       ]
     }
   }
+  zones: zone != null ? [zone!] : null
 }
 
+output name string = containerGroup.name
+output resourceGroupName string = resourceGroup().name
+output resourceId string = containerGroup.id
 output containerIPv4Address string = containerGroup.properties.ipAddress.ip
+output location string = location
